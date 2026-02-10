@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StegoGenius | Professional Steganography</title>
+    <!-- Fonts: Inter for Clean Professional Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Slate 900 */
+            --surface-color: #1e293b; /* Slate 800 */
+            --surface-highlight: #334155; /* Slate 700 */
+            --primary-color: #38bdf8; /* Sky 400 */
+            --primary-hover: #0ea5e9; /* Sky 500 */
+            --secondary-color: #2dd4bf; /* Teal 400 */
+            --text-main: #f8fafc; /* Slate 50 */
+            --text-muted: #94a3b8; /* Slate 400 */
+            --border-color: #334155;
+            --success: #4ade80;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: rgba(15, 23, 42, 0.9);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            background: rgba(45, 212, 191, 0.1);
+            color: var(--secondary-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid rgba(45, 212, 191, 0.2);
+        }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 350px; /* Workspace | Logs */
+            /* Removed fixed height calc to rely on flex-grow from body */
+            min-height: 0; 
+            overflow: hidden;
+        }
+
+        /* --- Workspace Area --- */
+        .workspace {
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--surface-color);
+            padding: 0.5rem;
+            border-radius: 12px;
+            width: fit-content;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: #0f172a; /* Dark text on bright bg */
+            box-shadow: 0 4px 6px -1px rgba(56, 189, 248, 0.3);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .tooltip-icon {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: help;
+            transition: color 0.2s;
+        }
+        .tooltip-icon:hover { color: var(--primary-color); }
+
+        /* Upload Zones */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.02);
+            position: relative;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary-color);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--success);
+            background: rgba(74, 222, 128, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            transition: color 0.3s;
+        }
+
+        .upload-zone:hover .upload-icon { color: var(--primary-color); }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .upload-label { color: var(--text-muted); font-size: 0.9rem; }
+        .upload-sub { font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; }
+
+        .hidden-input { display: none; }
+
+        /* Action Buttons */
+        .action-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #0f172a;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+            background: var(--primary-hover);
+        }
+
+        /* --- Log Console --- */
+        .log-panel {
+            background: #000;
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-header {
+            padding: 1rem;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .log-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .log-entry { margin-bottom: 0.5rem; opacity: 0; animation: fadeIn 0.3s forwards; }
+        .log-time { color: #475569; margin-right: 0.5rem; }
+        .log-info { color: #38bdf8; }
+        .log-success { color: #4ade80; }
+        .log-error { color: #ef4444; }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        .hidden { display: none !important; }
+
+        /* --- Modal --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active { opacity: 1; pointer-events: all; }
+
+        .modal-content {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal.active .modal-content { transform: scale(1); }
+
+        .result-img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: var(--surface-highlight); }
+
+        .btn-download {
+            background: var(--secondary-color);
+            color: #0f172a;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(45, 212, 191, 0.3); }
+
+        /* Mobile Responsive */
+        @media (max-width: 800px) {
+            main { grid-template-columns: 1fr; }
+            .log-panel { display: none; } /* Hide logs on mobile for cleaner look */
+            .upload-grid { grid-template-columns: 1fr; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-layer-group"></i>
+            StegoGenius
+        </div>
+        <div class="status-badge">
+            <i class="fa-solid fa-circle-check"></i> System Operational
+        </div>
+    </header>
+
+    <main>
+        <!-- Workspace: Forms & Inputs -->
+        <div class="workspace">
+            <div class="container">
+                
+                <!-- Tab Switching -->
+                <div class="tabs">
+                    <button id="tab-encrypt" class="tab-btn active" onclick="switchTab('encrypt')">
+                        <i class="fa-solid fa-lock"></i> Encrypt Data
+                    </button>
+                    <button id="tab-decrypt" class="tab-btn" onclick="switchTab('decrypt')">
+                        <i class="fa-solid fa-unlock"></i> Decrypt Data
+                    </button>
+                </div>
+
+                <!-- Encryption View -->
+                <div id="view-encrypt">
+                    <div class="card">
+                        <div class="section-title">
+                            1. System Configuration
+                            <i class="fa-regular fa-circle-question tooltip-icon" title="Upload the 'Cover' image (visible to public) and the 'Secret' image (hidden data)."></i>
+                        </div>
+
+                        <div class="upload-grid">
+                            <!-- Cover Upload -->
+                            <div class="upload-zone" id="zone-cover">
+                                <input type="file" id="file-cover" class="hidden-input" accept="image/*">
+                                <i class="fa-regular fa-image upload-icon" id="icon-cover"></i>
+                                <img id="preview-cover" class="preview-img">
+                                <div class="upload-label" id="label-cover">Click to upload Cover Image</div>
+                                <div class="upload-sub">The public carrier image</div>
+                            </div>
+
+                            <!-- Secret Upload -->
+                            <div class="upload-zone" id="zone-secret">
+                                <input type="file" id="file-secret" class="hidden-input" accept="image/*">
+                                <i class="fa-solid fa-user-secret upload-icon" id="icon-secret"></i>
+                                <img id="preview-secret" class="preview-img">
+                                <div class="upload-label" id="label-secret">Click to upload Secret Image</div>
+                                <div class="upload-sub">The hidden payload</div>
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <button class="btn-primary" onclick="processEncrypt()">
+                                <i class="fa-solid fa-fingerprint"></i> Encrypt & Hide
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decryption View -->
+                <div id="view-decrypt" class="hidden">
+                    <div class="card">
+                        <div class="section-title">
+                            1. Decryption Source
+                            <i class="fa-regular fa-circle-question tooltip-icon" title="Upload a 'Stego' image to recover the secret data hidden inside."></i>
+                        </div>
+
+                        <div class="upload-zone" style="height: 300px;" id="zone-stego">
+                            <input type="file" id="file-stego" class="hidden-input" accept="image/*">
+                            <i class="fa-solid fa-file-shield upload-icon" id="icon-stego"></i>
+                            <img id="preview-stego" class="preview-img">
+                            <div class="upload-label" id="label-stego">Click to upload Stego Image</div>
+                            <div class="upload-sub">The image containing hidden info</div>
+                        </div>
+
+                        <div class="action-row">
+                            <button class="btn-primary" onclick="processDecrypt()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Reveal Secret
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Log Panel -->
+        <aside class="log-panel">
+            <div class="log-header">
+                <span><i class="fa-solid fa-terminal"></i> SYSTEM_CONSOLE</span>
+                <span style="font-size: 0.7rem; opacity: 0.7;">v2.0.4 - LIVE</span>
+            </div>
+            <div class="log-content" id="log-content">
+                <div class="log-entry"><span class="log-time">[INIT]</span> System Initialized via secure handshake.</div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Result Modal -->
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Operation Successful</h2>
+            <img id="modal-img" class="result-img" src="">
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">Close</button>
+                <a id="download-link" class="btn-download" download="stego_result.png">
+                    <i class="fa-solid fa-download"></i> Download
+                </a>
+                <button class="btn-secondary hidden" id="transfer-btn" onclick="transferToDecrypt()">
+                    Use to Decrypt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        // --- State Management ---
+        const logs = document.getElementById('log-content');
+        let currentMode = 'encrypt';
+        let lastResultBlob = null;
+
+        // --- Tabs ---
+        function switchTab(mode) {
+            try {
+                currentMode = mode;
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                
+                if(mode === 'encrypt') {
+                    document.getElementById('tab-encrypt').classList.add('active');
+                    document.getElementById('view-encrypt').classList.remove('hidden');
+                    document.getElementById('view-decrypt').classList.add('hidden');
+                    log("INFO", "Switched to Encryption Mode.");
+                } else {
+                    document.getElementById('tab-decrypt').classList.add('active');
+                    document.getElementById('view-encrypt').classList.add('hidden');
+                    document.getElementById('view-decrypt').classList.remove('hidden');
+                    log("INFO", "Switched to Decryption Mode.");
+                }
+            } catch(e) {
+                log("ERROR", "Tab Switch Failed: " + e.message);
+            }
+        }
+
+        // --- File Handling Helper ---
+        function setupUpload(inputId, zoneId, previewId, iconId, labelId) {
+            try {
+                const input = document.getElementById(inputId);
+                const zone = document.getElementById(zoneId);
+                const preview = document.getElementById(previewId);
+                const icon = document.getElementById(iconId);
+                const label = document.getElementById(labelId);
+
+                if(!input || !zone) {
+                    console.error("Missing elements for setupUpload", inputId, zoneId);
+                    return;
+                }
+
+                // Click to Upload (delegated)
+                zone.addEventListener('click', (e) => {
+                    if(e.target !== input) {
+                        input.click();
+                    }
+                });
+
+                // Drag Events
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    zone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        zone.classList.add('dragover');
+                    }, false);
+                });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        zone.classList.remove('dragover');
+                    }, false);
+                });
+
+                // Drop
+                zone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if(files.length > 0) {
+                        input.files = files; // Set input files
+                        handleFile(files[0]);
+                    }
+                });
+
+                // Change
+                input.addEventListener('change', () => {
+                    if(input.files && input.files[0]) handleFile(input.files[0]);
+                });
+
+                function handleFile(file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        icon.style.display = 'none';
+                        label.innerText = file.name;
+                        log("SUCCESS", `Loaded file: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } catch(e) {
+                log("ERROR", "Setup Upload Failed: " + e.message);
+            }
+        }
+
+        // Init Uploads
+        window.addEventListener('DOMContentLoaded', () => {
+            log("INFO", "Initializing Interfaces...");
+            setupUpload('file-cover', 'zone-cover', 'preview-cover', 'icon-cover', 'label-cover');
+            setupUpload('file-secret', 'zone-secret', 'preview-secret', 'icon-secret', 'label-secret');
+            setupUpload('file-stego', 'zone-stego', 'preview-stego', 'icon-stego', 'label-stego');
+            log("READY", "System Ready.");
+        });
+
+        // --- Processing Logic ---
+        async function processEncrypt() {
+            try {
+                const cover = document.getElementById('file-cover').files[0];
+                const secret = document.getElementById('file-secret').files[0];
+
+                if(!cover) { log("WARN", "Cover image missing!"); return shakeError('zone-cover'); }
+                if(!secret) { log("WARN", "Secret image missing!"); return shakeError('zone-secret'); }
+
+                log("INFO", "Starting Encryption Sequence...");
+                
+                await waitLog("Analyzing Cover Image frequency domain...", 600);
+                await waitLog("Preparing Secret Payload...", 500);
+                await waitLog("Injecting data into Deep Latent Space...", 800);
+
+                const formData = new FormData();
+                formData.append('cover', cover);
+                formData.append('secret', secret);
+
+                const res = await fetch('/api/hide', { method: 'POST', body: formData });
+                if(!res.ok) throw new Error("Server Error: " + res.statusText);
+                
+                const blob = await res.blob();
+                lastResultBlob = blob;
+                
+                log("SUCCESS", "Encryption Complete. Artifact Generated.");
+                showModal("Stego Image Generated", blob, true);
+            } catch (e) {
+                log("ERROR", "Encryption Failed: " + e.message);
+                console.error(e);
+            }
+        }
+
+        async function processDecrypt() {
+            try {
+                const stego = document.getElementById('file-stego').files[0];
+                if(!stego) { log("WARN", "Stego image missing!"); return shakeError('zone-stego'); }
+
+                log("INFO", "Starting Decryption Sequence...");
+                await waitLog("Scanning for steganographic anomalies...", 700);
+                await waitLog("Reconstructing hidden feature maps...", 800);
+
+                const formData = new FormData();
+                formData.append('stego', stego);
+
+                const res = await fetch('/api/reveal', { method: 'POST', body: formData });
+                if(!res.ok) throw new Error("Server Error: " + res.statusText);
+
+                const blob = await res.blob();
+                log("SUCCESS", "Decryption Complete. Secret Revealed.");
+                showModal("Secret Image Revealed", blob, false);
+
+            } catch (e) {
+                log("ERROR", "Decryption Failed: " + e.message);
+                console.error(e);
+            }
+        }
+
+        // --- Utilities ---
+        function log(type, msg) {
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false});
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type.toLowerCase()}">[${type}]</span> ${msg}`;
+            
+            if(logs) {
+                // Check if user is near bottom (within 50px)
+                // Use a larger threshold to be forgiving
+                const threshold = 100;
+                const isAtBottom = logs.scrollHeight - logs.scrollTop - logs.clientHeight < threshold;
+                
+                logs.appendChild(div);
+                
+                // Only auto-scroll if they were strictly at the bottom
+                if (isAtBottom) {
+                     logs.scrollTop = logs.scrollHeight;
+                }
+            }
+        }
+
+        function waitLog(msg, ms) {
+            return new Promise(r => {
+                log("INFO", msg);
+                setTimeout(r, ms);
+            });
+        }
+
+        function shakeError(elementId) {
+            const el = document.getElementById(elementId);
+            if(el) {
+                el.style.transform = "translateX(-10px)";
+                el.style.borderColor = "var(--error)";
+                setTimeout(() => { el.style.transform = "translateX(10px)"; }, 100);
+                setTimeout(() => { el.style.transform = "translateX(0)"; }, 200);
+                setTimeout(() => { el.style.borderColor = "var(--border-color)"; }, 1000);
+            }
+            log("ERROR", "Missing Input Files.");
+        }
+
+        // --- Modal System ---
+        function showModal(title, blob, allowTransfer) {
+            const url = URL.createObjectURL(blob);
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-img').src = url;
+            document.getElementById('download-link').href = url;
+            document.getElementById('transfer-btn').classList.toggle('hidden', !allowTransfer);
+            document.getElementById('result-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('active');
+        }
+
+        function transferToDecrypt() {
+            if(!lastResultBlob) return;
+            closeModal();
+            switchTab('decrypt');
+            
+            // Populate Decrypt Input programmatically
+            const file = new File([lastResultBlob], "stego_artifact.png", {type: "image/png"});
+            
+            // We can't set file input value programmatically for security, 
+            // but we can simulate the UI state
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            document.getElementById('file-stego').files = dt.files;
+            
+            // Trigger visual update
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('preview-stego').src = e.target.result;
+                document.getElementById('preview-stego').style.display = 'block';
+                document.getElementById('icon-stego').style.display = 'none';
+                document.getElementById('label-stego').innerText = "stego_artifact.png (Generated)";
+            };
+            reader.readAsDataURL(file);
+            log("INFO", "Transferred generated artifact to Decryption stage.");
+        }
+
+        // Close modal on outside click
+        document.getElementById('result-modal').addEventListener('click', (e) => {
+            if(e.target === document.getElementById('result-modal')) closeModal();
+        });
+
+    </script></body>
+</html>

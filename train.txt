@@ -1,0 +1,4 @@
+python deep_stego.py --train_path "data/subset_train" --epochs 50 --batch_size 32 --img_size 64
+
+
+python deep_stego.py --train_path "tiny-imagenet-200/tiny-imagenet-200/train" --val_path "tiny-imagenet-200/tiny-imagenet-200/val" --epochs 200 --batch_size 32
