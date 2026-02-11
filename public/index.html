@@ -467,6 +467,22 @@
     <div class="modal" id="result-modal">
         <div class="modal-content">
             <h2 id="modal-title">Operation Successful</h2>
+            
+            <!-- Metrics Display -->
+            <div id="modal-metrics" style="display: none; margin-bottom: 1rem;">
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                    <div style="background: rgba(56, 189, 248, 0.1); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                        <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Stealth Score</div>
+                        <div id="metric-stealth" style="font-size: 1.25rem; font-weight: 700; color: #38bdf8;">--%</div>
+                    </div>
+                    <div style="background: rgba(74, 222, 128, 0.1); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(74, 222, 128, 0.3);">
+                        <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Data Fidelity</div>
+                        <div id="metric-fidelity" style="font-size: 1.25rem; font-weight: 700; color: #4ade80;">--%</div>
+                    </div>
+                </div>
+                <div id="metric-detail-psnr" style="font-size: 0.7rem; color: #64748b; margin-top: 0.5rem; font-family: monospace;"></div>
+            </div>
+
             <img id="modal-img" class="result-img" src="">
             
             <div class="modal-footer">
@@ -609,11 +625,19 @@
                 const res = await fetch('/api/hide', { method: 'POST', body: formData });
                 if(!res.ok) throw new Error("Server Error: " + res.statusText);
                 
-                const blob = await res.blob();
+                const data = await res.json();
+                
+                // Decode Base64
+                const binary = atob(data.image.split(',')[1]);
+                const array = [];
+                for(let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                const blob = new Blob([new Uint8Array(array)], {type: 'image/png'});
                 lastResultBlob = blob;
                 
                 log("SUCCESS", "Encryption Complete. Artifact Generated.");
-                showModal("Stego Image Generated", blob, true);
+                showModal("Stego Image Generated", blob, true, data.metrics);
             } catch (e) {
                 log("ERROR", "Encryption Failed: " + e.message);
                 console.error(e);
@@ -635,9 +659,18 @@
                 const res = await fetch('/api/reveal', { method: 'POST', body: formData });
                 if(!res.ok) throw new Error("Server Error: " + res.statusText);
 
-                const blob = await res.blob();
+                const data = await res.json();
+                
+                // Decode Base64
+                const binary = atob(data.image.split(',')[1]);
+                const array = [];
+                for(let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                const blob = new Blob([new Uint8Array(array)], {type: 'image/png'});
+
                 log("SUCCESS", "Decryption Complete. Secret Revealed.");
-                showModal("Secret Image Revealed", blob, false);
+                showModal("Secret Image Revealed", blob, false, null);
 
             } catch (e) {
                 log("ERROR", "Decryption Failed: " + e.message);
@@ -687,12 +720,28 @@
         }
 
         // --- Modal System ---
-        function showModal(title, blob, allowTransfer) {
+        function showModal(title, blob, allowTransfer, metrics) {
             const url = URL.createObjectURL(blob);
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-img').src = url;
             document.getElementById('download-link').href = url;
             document.getElementById('transfer-btn').classList.toggle('hidden', !allowTransfer);
+            
+            // Metrics UI
+            const metricsContainer = document.getElementById('modal-metrics');
+            if(metrics && metricsContainer) {
+                metricsContainer.style.display = 'block';
+                // Calculate percentage for display (PSNR > 40dB is typically considered "excellent/lossless-like")
+                const fidelityScore = Math.min(100, (metrics.secret_psnr / 40) * 100).toFixed(1);
+                const stealthScore = Math.min(100, (metrics.cover_psnr / 40) * 100).toFixed(1);
+                
+                document.getElementById('metric-fidelity').innerText = `${fidelityScore}%`;
+                document.getElementById('metric-stealth').innerText = `${stealthScore}%`;
+                document.getElementById('metric-detail-psnr').innerText = `Recovery PSNR: ${metrics.secret_psnr} dB`;
+            } else if (metricsContainer) {
+                metricsContainer.style.display = 'none';
+            }
+
             document.getElementById('result-modal').classList.add('active');
         }
 

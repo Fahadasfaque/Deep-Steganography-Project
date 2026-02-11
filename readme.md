@@ -1,104 +1,144 @@
-# 🕵️‍♂️ Deep Steganography Experience
+# 🕵️‍♂️ StegoGenius: Deep Steganography Dashboard
 
-![Project Banner](public/preview.png)
+> **Invisible Data Hiding Powered by Stego-GAN & Modern Web Technologies**
 
-> _An advanced Deep Learning application that hides secrets inside images using Steganographic GANs, wrapped in a premium Glassmorphism web interface._
-
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0-orange?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-High_Performance-green?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![HTML5](https://img.shields.io/badge/HTML5-Modern-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5)
-[![CSS3](https://img.shields.io/badge/CSS3-Glassmorphism-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
-
----
+![StegoGenius Banner](public/preview.png)
 
 ## 🌟 Overview
 
-Welcome to **Deep Steganography**. This project isn't just a security tool; it's a **state-of-the-art AI system** accessible through a beautiful web dashboard. It allows you to encipher secret data into ordinary images, making the secret invisible to the naked eye. Perfect for secure communication or digital watermarking demonstrations.
+**StegoGenius** is a state-of-the-art implementation of Deep Steganography, using Generative Adversarial Networks (GANs) to hide secret images inside cover images with near-perfect invisibility.
+
+Unlike traditional LS (Least Significant Bit) methods that are easily detected, StegoGenius uses a deep neural network to embed information into the high-frequency features of an image, making it robust and secure.
+
+This project wraps the powerful PyTorch backend in a **premium, professional-grade Web Dashboard** designed for clarity, ease of use, and visual appeal.
 
 ## ✨ Key Features
 
-- **🧠 Deep Learning Core**: Uses a custom **U-Net + GAN** architecture (Alice, Bob, and Eve networks) to learn perfect hiding strategies.
-- **👁️ Invisible Secrecy**: The "Stego Image" looks identical to the original Cover Image.
-- **🖥️ Glassmorphism UI**: A premium, modern web interface designed with **translucency, blur effects, and smooth animations**.
-- **🚀 Instant Results**: Powered by **FastAPI** for real-time inference.
-- **🖱️ Drag & Drop**: Intuitive workflow—just drop your images to hide or reveal secrets.
-- **📱 Responsive Design**: Works beautifully on desktops and large screens.
+### 🖥️ Professional Web Interface
+
+- **Cyber-Clean Dashboard**: A modern, dark-themed UI built with Glassmorphism aesthetics.
+- **Intelligent Console**: A built-in system log panel that tracks every step of the encoding/decoding process with smart auto-scrolling.
+- **Drag & Drop Workflow**: Seamless file handling for both encryption and decryption.
+- **Instant Previews**: Visual feedback for all uploaded and generated images.
+
+### 🧠 Advanced AI Core (Stego-GAN)
+
+- **Encoder (Alice)**: Merges the _Cover Image_ and _Secret Image_ into a _Stego Image_.
+- **Decoder (Bob)**: Extracts the _Secret Image_ from the _Stego Image_.
+- **Critic (Eve)**: A discriminator network used during training to ensure the Stego image looks identical to the original.
+
+### ⚡ Performance
+
+- **Real-Time Inference**: Powered by **FastAPI** and optimized PyTorch models for instant results.
+- **Production Ready**: Includes pre-trained checkpoints (`checkpoint_ep50.pth`) for immediate use.
 
 ---
 
-## 🛠️ Tech Stack & Libraries
+## 🛠️ Technology Stack
 
-This project uses modern AI and Web technologies:
-
-| Category     | Technology       | Usage                                                                   |
-| :----------- | :--------------- | :---------------------------------------------------------------------- |
-| **AI Core**  | **PyTorch**      | The brain. Handles the Neural Networks (PrepNet, HidingNet, RevealNet). |
-| **Backend**  | **FastAPI**      | High-performance API server to run the Python models.                   |
-| **Server**   | **Uvicorn**      | Lightning-fast ASI server implementation.                               |
-| **Frontend** | **Vanilla JS**   | Lightweight, fast logic for the UI without framework bloat.             |
-| **Styling**  | **CSS3 (Glass)** | Custom "Glassmorphism" aesthetic with blurred backgrounds.              |
-| **Data**     | **Pillow (PIL)** | Advanced image processing and manipulation.                             |
+| Component    | Technology             | Description                                       |
+| :----------- | :--------------------- | :------------------------------------------------ |
+| **AI Model** | **PyTorch**            | Deep Learning framework for the GAN architecture. |
+| **Backend**  | **FastAPI**            | High-performance, async Python web framework.     |
+| **Frontend** | **Vanilla JS + CSS3**  | Lightweight, framework-free UI for maximum speed. |
+| **Styling**  | **CSS Grid & Flexbox** | Responsive layout with custom animations.         |
+| **Server**   | **Uvicorn**            | Lightning-fast ASGI server implementation.        |
 
 ---
 
 ## 🚀 Getting Started
 
-Clone the repository and start the magic in seconds.
+Follow these steps to set up the project locally.
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- A love for secrets 🤫
+- Python 3.8+
+- pip (Python Package Manager)
+- A GPU is recommended for training, but CPU works fine for inference (running the app).
 
 ### Installation
 
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+1.  **Clone the Repository**
+
+    ```bash
+    git clone https://github.com/yourusername/stego-genius.git
+    cd stego-genius
+    ```
+
+2.  **Create a Virtual Environment (Optional but Recommended)**
+
+    ```bash
+    python -m venv venv
+    # Windows
+    venv\Scripts\activate
+    # Mac/Linux
+    source venv/bin/activate
+    ```
+
+3.  **Install Dependencies**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### ▶️ Running the Application
+
+1.  **Start the Server**
+
+    ```bash
+    uvicorn app:app --reload
+    ```
+
+2.  **Access the Dashboard**
+    Open your browser and navigate to:
+    `http://127.0.0.1:8000`
+
+---
+
+## 🎮 User Guide
+
+### 1. Encryption (Hiding Data)
+
+1.  Navigate to the **Encrypt Data** tab.
+2.  Upload a **Cover Image** (the public carrier).
+3.  Upload a **Secret Image** (the data you want to hide).
+4.  Click **Encrypt & Hide**.
+5.  The system will generate a **Stego Image**. Download it!
+
+### 2. Decryption (Revealing Data)
+
+1.  Navigate to the **Decrypt Data** tab.
+2.  Upload the **Stego Image** you generated earlier.
+3.  Click **Reveal Secret**.
+4.  The system will extract and display the hidden **Secret Image**.
+
+---
+
+## 📂 Project Structure
+
+```
+file-structure
+├── app.py              # FastAPI Backend Server
+├── deep_stego.py       # PyTorch Model Definitions (Stego-GAN)
+├── inference.py        # Logic for running the model
+├── requirements.txt    # Project Dependencies
+├── checkpoints/        # Saved Model Weights
+│   └── checkpoint_ep50.pth
+├── public/             # Frontend Assets
+│   ├── index.html      # Main Dashboard
+│   └── preview.png     # (Optional) Screenshot of the UI
+└── readme.md           # Documentation
 ```
 
-### Run the App
+---
 
-```bash
-# Start the server with hot-reload
-uvicorn app:app --reload
-```
+## 🤝 Contributing
 
-Visit `http://localhost:8000` to access the interface.
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).
 
 ---
 
-## �️ Workflow & Architecture
-
-The project follows a "Client-Server-AI" architecture:
-
-1.  **The User Interface**:
-    - Users interact with the **HTML/CSS/JS** frontend.
-    - Images are uploaded via Drag & Drop.
-2.  **The API Layer (FastAPI)**:
-    - Receives images at `/api/hide` or `/api/reveal`.
-    - Converts images to PyTorch Tensors.
-3.  **The AI Engine (Deep Stego)**:
-    - **Encoder (Alice)**: Merges the Cover and Secret into a Stego image.
-    - **Decoder (Bob)**: Extracts the Secret from the Stego image.
-4.  **Response**:
-    - The processed image is streamed back to the browser instantly.
-
----
-
-## � Deployment Ready
-
-This application is production-ready. The model checkpoint (`checkpoint_ep50.pth`) is pre-loaded, and the server is optimized for inference.
-
----
-
-## 🎨 Credits
-
-Designed and developed with ❤️ by **Fahad Asfaque**.
-
-_Inspired by the concept of "Security through Obscurity" in the AI era._
-
----
-
-_Note: This project is for educational and showcase purposes._
+> _Developed with ❤️ by Fahad Asfaque_

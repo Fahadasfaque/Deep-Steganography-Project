@@ -1,13 +1,15 @@
 import shutil
 import os
 import sys
+import math
+import base64
 from pathlib import Path
 from io import BytesIO
 
 import torch
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from torchvision import transforms
 from PIL import Image
@@ -51,13 +53,24 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-def tensor_to_stream(tensor):
-    """Converts a GPU tensor to a PNG byte stream."""
+def tensor_to_base64(tensor):
+    """Converts a GPU tensor to a Base64 encoded PNG string."""
     img = transforms.ToPILImage()(tensor.squeeze(0).cpu().clamp(0, 1))
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='PNG')
     img_byte_arr.seek(0)
-    return img_byte_arr
+    return base64.b64encode(img_byte_arr.read()).decode('utf-8')
+
+def calculate_psnr(img1, img2):
+    """Calculates PSNR (Peak Signal-to-Noise Ratio) between two tensors."""
+    mse = torch.mean((img1 - img2) ** 2)
+    if mse == 0:
+        return 100.0
+    return 20 * math.log10(1.0 / math.sqrt(mse.item()))
+
+def calculate_mse(img1, img2):
+    """Calculates Mean Squared Error."""
+    return torch.mean((img1 - img2) ** 2).item()
 
 # --- API Endpoints ---
 
@@ -76,9 +89,31 @@ async def hide_image(cover: UploadFile = File(...), secret: UploadFile = File(..
         with torch.no_grad():
             prep_secret = prep_net(secret_tensor)
             stego = hiding_net(cover_tensor, prep_secret)
+            
+            # For metrics: Reveal the secret immediately from our generated stego
+            revealed_check = reveal_net(stego)
+
+        # Calculate Metrics
+        # 1. Steganographic Quality (How invisible is the secret?)
+        # Compare Cover vs Stego
+        psnr_cover = calculate_psnr(cover_tensor, stego)
+        mse_cover = calculate_mse(cover_tensor, stego)
         
-        # Return Image
-        return StreamingResponse(tensor_to_stream(stego), media_type="image/png")
+        # 2. Recovery Fidelity (How well can we read the secret?)
+        # Compare Original Secret vs Revealed Secret
+        psnr_secret = calculate_psnr(secret_tensor, revealed_check)
+        mse_secret = calculate_mse(secret_tensor, revealed_check)
+
+        # Return Data
+        return JSONResponse({
+            "image": f"data:image/png;base64,{tensor_to_base64(stego)}",
+            "metrics": {
+                "cover_psnr": round(psnr_cover, 2),
+                "cover_mse": round(mse_cover, 5),
+                "secret_psnr": round(psnr_secret, 2),
+                "secret_mse": round(mse_secret, 5)
+            }
+        })
         
     except Exception as e:
         import traceback
@@ -96,8 +131,11 @@ async def reveal_image(stego: UploadFile = File(...)):
         with torch.no_grad():
             revealed = reveal_net(stego_tensor)
         
-        # Return Image
-        return StreamingResponse(tensor_to_stream(revealed), media_type="image/png")
+        # Return Image only (base64)
+        return JSONResponse({
+            "image": f"data:image/png;base64,{tensor_to_base64(revealed)}",
+            "metrics": None # Can't calculate without ground truth
+        })
 
     except Exception as e:
         import traceback
