@@ -2,7 +2,7 @@
 
 > **Invisible Data Hiding Powered by Stego-GAN & Modern Web Technologies**
 
-![StegoGenius Banner](public/preview.png)
+![StegoGenius Banner](https://res.cloudinary.com/dhclr2ufn/image/upload/v1770816123/screencapture-127-0-0-1-8000-2026-02-11-18_48_17_jp9lnz.png)
 
 ## 🌟 Overview
 
